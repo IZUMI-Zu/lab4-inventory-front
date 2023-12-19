@@ -97,31 +97,50 @@ const SerialProvider = ({
    * @param port the port to read from
    */
   const readUntilClosed = async (port: SerialPort) => {
+    // TODO right now this only works for data with "\n" as the delimiter
     if (port.readable) {
+      let buffer = "";
       const textDecoder = new TextDecoderStream();
       const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
       readerRef.current = textDecoder.readable.getReader();
-
+  
       try {
-        while (true) {
+        while (readerRef.current) {
           const { value, done } = await readerRef.current.read();
           if (done) {
             break;
           }
-          const timestamp = Date.now();
-          Array.from(subscribersRef.current).forEach(([, callback]) => {
-            callback({ value, timestamp });
-          });
+          // Append new data to buffer
+          buffer += value;
+  
+          // Check if buffer contains a complete message
+          let newlineIndex = buffer.indexOf("\n");
+          while (newlineIndex !== -1) {
+            // Extract the complete message
+            const message = buffer.slice(0, newlineIndex);
+            // Remove the message from the buffer
+            buffer = buffer.slice(newlineIndex + 1);
+  
+            // Handle the message
+            const timestamp = Date.now();
+            Array.from(subscribersRef.current).forEach(([, callback]) => {
+              callback({ value: message, timestamp });
+            });
+  
+            // Check if there is another complete message in the buffer
+            newlineIndex = buffer.indexOf("\n");
+          }
         }
       } catch (error) {
         console.error(error);
       } finally {
         readerRef.current.releaseLock();
       }
-
+  
       await readableStreamClosed.catch(() => { }); // Ignore the error
     }
   };
+  
 
   /**
    * Attempts to open the given port.

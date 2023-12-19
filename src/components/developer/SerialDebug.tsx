@@ -1,5 +1,5 @@
 import { Button, Input } from "@nextui-org/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSerial } from "../../utils/SerialProvider";
 
 
@@ -14,9 +14,15 @@ export const SerialDebug = () => {
         send(dataToSend);
     }
 
-    subscribe((message) => {
-        setReceivedData(message.timestamp + " " + message.value);
-    });
+    useEffect(() => {
+        const unsubscribe = subscribe((message) => {
+            console.debug(message)
+            const time = new Date(message.timestamp).toLocaleString();
+            setReceivedData("Time: " + time + "\n " + "Message: " + message.value);
+        });
+        return unsubscribe;
+
+    }, [subscribe]);
 
     return (
         <>
@@ -32,7 +38,6 @@ export const SerialDebug = () => {
                     label="Sent Data"
                     value={dataToSend}
                     onChange={(e) => setSerialData(e.target.value)}
-                    isReadOnly
                     className="col-start-1 col-end-3 max-w-x p-6 pt-2 ml-1"
                 >
                 </Input>
