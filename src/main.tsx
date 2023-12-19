@@ -8,13 +8,15 @@ import iTable from './pages/index';
 import InventorySubmit from './pages/inventory';
 import InventoryRead from './pages/inventory_read';
 import developer from './pages/developers';
-import './index.css'
+import SerialPortProvider from './utils/SerialProvider';
+import './styles/index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Router>
-        <NextUIProvider children={undefined}>
-          <Layout children={undefined}>
+      <NextUIProvider>
+        <SerialPortProvider>
+          <Layout>
             <Routes>
               <Route path="/" Component={iTable} />
               <Route path="/inventory" Component={InventorySubmit} />
@@ -22,7 +24,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/developers" Component={developer} />
             </Routes>
           </Layout>
-        </NextUIProvider>
-    </Router>  
+        </SerialPortProvider>
+      </NextUIProvider>
+    </Router>
   </React.StrictMode>,
 )

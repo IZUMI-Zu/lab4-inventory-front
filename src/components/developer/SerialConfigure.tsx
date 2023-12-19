@@ -1,4 +1,5 @@
 import { Select } from "@nextui-org/react";
+import { useSerial } from "../../utils/SerialProvider";
 
 export const SerialConfigure = () => {
     const dataBitsOptions = [
@@ -22,10 +23,20 @@ export const SerialConfigure = () => {
         { value: "hardware", label: "Hardware" }
     ];
 
-    
+    const { connect, disconnect, port } = useSerial();
+
+    const sendData = async (data) => {
+        if(!port) {
+          return;
+        }
+      
+        await port.write(data);
+      }
 
     return (
         <>
-
+             <button onClick={connect}>Connect</button> 
+             <button onClick={disconnect}>Disconnect</button> 
+             
         </>);
 }
