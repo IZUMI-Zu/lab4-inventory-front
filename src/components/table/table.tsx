@@ -23,7 +23,7 @@ import { ChevronDownIcon } from "./ChevronDownIcon";
 import { SearchIcon } from "./SearchIcon";
 import { columns, statusOptions } from "./data";
 import { capitalize } from "./utils";
-import getInventory from "../../api/getInventory";
+import getInventory, { InventoryType } from "../../api/getInventory";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
   true: "success",
@@ -33,7 +33,7 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 const INITIAL_VISIBLE_COLUMNS = ["card_number", "item_name", "warehouse_number", "shelf_number", "is_in_stock"];
 
 // TODO: better
-let _inventories: unknown[];
+let _inventories: InventoryType[];
 async function fetchInventory() {
   _inventories = await getInventory();
 }
