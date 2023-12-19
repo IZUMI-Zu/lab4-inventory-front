@@ -108,7 +108,7 @@ export const Content = () => {
               ) : null}
             </h3>
           </Card>
-          <Card className="grid grid-cols-3 min-w-full mt-5">
+          <Card className="grid grid-cols-3 min-w-full mt-6">
             <Input
               label="Password"
               variant="flat"
