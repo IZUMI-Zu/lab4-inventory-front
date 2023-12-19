@@ -28,6 +28,7 @@ export interface SerialContextValue {
   connect(): Promise<boolean>;
   disconnect(): void;
   subscribe(callback: SerialMessageCallback): () => void;
+  send(data: string): Promise<void>;
 }
 
 export const SerialContext = createContext<SerialContextValue>({
@@ -37,6 +38,7 @@ export const SerialContext = createContext<SerialContextValue>({
   disconnect: () => { },
   portState: "closed",
   subscribe: () => () => { },
+  send: () => Promise.resolve(),
 });
 
 export const useSerial = () => useContext(SerialContext);
@@ -71,6 +73,22 @@ const SerialProvider = ({
     return () => {
       subscribersRef.current.delete(id);
     };
+  };
+
+  /**
+   * Sends the given data to the port.
+   * @param data the data to send
+   * @returns a promise that resolves when the data has been sent
+   * @throws if the port is not open
+   */
+  const send = async (data: string) => {
+    const port = portRef.current;
+    if (port && port.writable) {
+      const writer = port.writable.getWriter();
+      const encoder = new TextEncoder();
+      await writer.write(encoder.encode(data));
+      writer.releaseLock();
+    }
   };
 
   /**
@@ -240,6 +258,7 @@ const SerialProvider = ({
         canUseSerial,
         hasTriedAutoconnect,
         subscribe,
+        send,
         portState,
         connect: manualConnectToPort,
         disconnect: manualDisconnectFromPort,
