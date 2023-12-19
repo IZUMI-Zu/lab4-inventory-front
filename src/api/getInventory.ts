@@ -12,23 +12,27 @@ export interface InventoryType {
 }
 
 export default async function getInventory() {
-  const response = await fetch(
-    API_URL.concat("?limit=1000&offset=0"),
-    {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-      },
+  try {
+    const response = await fetch(
+      API_URL.concat("?limit=1000&offset=0"),
+      {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Error fetching inventory: " + response.status);
     }
-  );
 
-  if (!response.ok) {
-    throw new Error("Error fetching inventory: " + response.status);
+    const data = await response.json();
+    // Use the data here. For example:
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching inventory:", error);
+    return [];
   }
-
-  const data = await response.json();
-  // Use the data here. For example:
-
-  return data;
 }
-
