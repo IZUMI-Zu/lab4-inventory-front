@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Table,
   TableHeader,
@@ -18,6 +18,7 @@ import {
   Selection,
   ChipProps,
   SortDescriptor,
+  CircularProgress,
 } from "@nextui-org/react";
 import { ChevronDownIcon } from "./ChevronDownIcon";
 import { SearchIcon } from "./SearchIcon";
@@ -32,14 +33,14 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 
 const INITIAL_VISIBLE_COLUMNS = ["card_number", "item_name", "warehouse_number", "shelf_number", "is_in_stock"];
 
-// TODO: better
-let _inventories: InventoryType[];
-async function fetchInventory() {
-  _inventories = await getInventory();
-}
-fetchInventory();
+// // TODO: better
+// let _inventories: InventoryType[];
+// async function fetchInventory() {
+//   _inventories = await getInventory();
+// }
+// fetchInventory();
 
-type Inventory = (typeof _inventories)[0];
+type Inventory = InventoryType;
 
 export default function TableWrapper() {
   const [filterValue, setFilterValue] = React.useState("");
@@ -68,7 +69,23 @@ export default function TableWrapper() {
     );
   }, [visibleColumns]);
 
-  const [inventories, setInventories] = React.useState<Inventory[]>(_inventories);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  const [inventories, setInventories] = React.useState<Inventory[]>([]);
+
+  useEffect(() => {
+    const fetchInventories = async () => {
+      const result = await getInventory();
+      if (result === null) {
+        setInventories([]);
+      } else {
+        setInventories(result);
+      }
+      setIsLoading(false);
+    };
+
+    fetchInventories();
+  }, []);
 
   const filteredItems = React.useMemo(() => {
     let filteredInventories = [...inventories];
@@ -295,6 +312,10 @@ export default function TableWrapper() {
     );
   }, [page, pages, onPreviousPage, onNextPage]);
 
+  if (isLoading) {
+    // TODO better style
+    return <CircularProgress className="content-center m-40 ml-96 pl-32" label="Loading..." />
+  }
   return (
     <Table
       aria-label="Example table with custom cells, pagination and sorting"
