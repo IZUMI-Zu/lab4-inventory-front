@@ -49,9 +49,20 @@ const SerialProvider = ({
 }: PropsWithChildren<SerialProviderProps>) => {
   const [canUseSerial] = useState(() => "serial" in navigator);
 
+  // TODO Tmp solution to persisting state between refreshes
+  const getInitialManualDisconnectState = () => {
+    const savedState = sessionStorage.getItem('hasManuallyDisconnected');
+    return savedState ? JSON.parse(savedState) : false;
+  };
+
   const [portState, setPortState] = useState<PortState>("closed");
   const [hasTriedAutoconnect, setHasTriedAutoconnect] = useState(false);
-  const [hasManuallyDisconnected, setHasManuallyDisconnected] = useState(false);
+  const [hasManuallyDisconnected, setHasManuallyDisconnected] = useState(getInitialManualDisconnectState);
+
+  // TODO Tmp solution to persisting state between refreshes
+  useEffect(() => {
+    sessionStorage.setItem('hasManuallyDisconnected', JSON.stringify(hasManuallyDisconnected));
+  }, [hasManuallyDisconnected]);
 
   const portRef = useRef<SerialPort | null>(null);
   const readerRef = useRef<ReadableStreamDefaultReader | null>(null);
