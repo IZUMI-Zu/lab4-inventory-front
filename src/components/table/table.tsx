@@ -32,7 +32,12 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 
 const INITIAL_VISIBLE_COLUMNS = ["card_number", "item_name", "warehouse_number", "shelf_number", "is_in_stock"];
 
-const _inventories = await getInventory();
+// TODO: better
+let _inventories: unknown[];
+async function fetchInventory() {
+  _inventories = await getInventory();
+}
+fetchInventory();
 
 type Inventory = (typeof _inventories)[0];
 

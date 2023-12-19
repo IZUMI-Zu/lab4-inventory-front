@@ -1,5 +1,16 @@
 import {API_URL} from "./url.js";
 
+export interface InventoryType {
+  id: number;
+  item_number: string;
+  card_number: string;
+  item_name: string;
+  warehouse_number: string;
+  shelf_number: string;
+  storage_time: string;
+  is_in_stock: boolean;
+}
+
 export default async function getInventory() {
   const response = await fetch(
     API_URL.concat("?limit=1000&offset=0"),
