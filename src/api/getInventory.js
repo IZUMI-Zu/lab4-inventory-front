@@ -19,5 +19,5 @@ export default async function getInventory() {
   // Use the data here. For example:
 
   return data;
-};
+}
 
