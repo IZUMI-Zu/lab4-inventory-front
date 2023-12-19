@@ -4,7 +4,7 @@ import EyeFilledIcon from "./EyeFilledIcon";
 import EyeSlashFilledIcon from "./EyeSlashFilledIcon";
 import { useForm } from "react-hook-form";
 import postInventory from "../../api/postInventory";
-import { readCardId } from "../../utils/rfid";
+import { RfidCommand } from "../../utils/rfid";
 
 interface FormValues {
   itemNumber: string;
@@ -30,7 +30,8 @@ export const Content = () => {
       setIsSubmit(true);
       console.log(data);
       console.log(keyPassword);
-      await postInventory(data, await readCardId(), true);
+      /// TODO
+      await postInventory(data, await RfidCommand.readCard().toString(), true);
       setIsSubmit(false);
     } catch (error) {
       console.error(error);

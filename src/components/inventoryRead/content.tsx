@@ -65,6 +65,7 @@ export const Content = () => {
   ];
 
   useEffect(() => {
+    // todo
     const unsubscribe = subscribe((message) => {
       if (toReceive) {
         // convert message to buffer
@@ -92,8 +93,8 @@ export const Content = () => {
           itemName: fields[1],
           warehouseNumber: fields[2],
           shelfNumber: fields[3],
-          storageTime: fields[4],
-          isInStock: fields[5] === "true" ? true : false,
+          storageTime: "2023-01-01",
+          isInStock: true,
         });
       }
     });
