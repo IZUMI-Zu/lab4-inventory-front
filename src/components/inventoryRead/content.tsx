@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Input, Card, Button, Select, SelectItem } from "@nextui-org/react";
-import { EyeFilledIcon } from "./EyeFilledIcon";
-import { EyeSlashFilledIcon } from "./EyeSlashFilledIcon";
+import EyeFilledIcon from "./EyeFilledIcon";
+import EyeSlashFilledIcon from "./EyeSlashFilledIcon";
 import { readCardId } from "../../utils/rfid";
 
 interface FormValues {

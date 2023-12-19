@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Input, Card, Button, Spinner } from "@nextui-org/react";
-import { EyeFilledIcon } from "./EyeFilledIcon";
-import { EyeSlashFilledIcon } from "./EyeSlashFilledIcon";
+import EyeFilledIcon from "./EyeFilledIcon";
+import EyeSlashFilledIcon from "./EyeSlashFilledIcon";
 import { useForm } from "react-hook-form";
 import postInventory from "../../api/postInventory";
 import { readCardId } from "../../utils/rfid";

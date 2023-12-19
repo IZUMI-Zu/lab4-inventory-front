@@ -1,5 +1,6 @@
-import React from "react";
-export const EyeFilledIcon = (props) => (
+import React, { SVGProps } from "react";
+
+const EyeFilledIcon: React.FC<SVGProps<SVGSVGElement>> = (props) => (
   <svg
     aria-hidden="true"
     fill="none"
@@ -20,3 +21,5 @@ export const EyeFilledIcon = (props) => (
     />
   </svg>
 );
+
+export default EyeFilledIcon;
