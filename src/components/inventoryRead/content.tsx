@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Input, Card, Button, Select, SelectItem } from "@nextui-org/react";
 import EyeFilledIcon from "./EyeFilledIcon";
 import EyeSlashFilledIcon from "./EyeSlashFilledIcon";
-import { readCardId } from "../../utils/rfid";
+import { RfidCommand } from "../../utils/rfid";
+import { SerialContext } from "../../utils/SerialProvider";
 
 interface FormValues {
   itemNumber: string;
@@ -14,6 +15,11 @@ interface FormValues {
 }
 
 export const Content = () => {
+
+  const { send, subscribe } = React.useContext(SerialContext);
+
+  const [toReceive, setToReceive] = useState<boolean>(false);
+
   const [formValues, setFormValues] = useState<FormValues>({
     itemNumber: "",
     itemName: "",
@@ -58,17 +64,46 @@ export const Content = () => {
     { value: "false", label: "Out of Stock" },
   ];
 
+  useEffect(() => {
+    const unsubscribe = subscribe((message) => {
+      if (toReceive) {
+        // convert message to buffer
+        const res = message.value;
+        const buffer = new Uint8Array(res.length);
+        for (let i = 0; i < res.length; i++) {
+          buffer[i] = res.charCodeAt(i);
+        }
+        const view = new DataView(buffer.buffer);
+        
+        const state = view.getUint8(0); // 获取状态
+        const cardType = view.getUint8(1); // 获取卡类型
+        const cardNumber = view.getUint32(2); // 获取卡号，假设卡号是32位的
+        console.log(state, cardType, cardNumber);
+
+        setCardId(cardNumber.toString());
+
+        // 获取数据，假设数据是从第6个字节开始，长度为16个字节的字符串
+        const dataBuffer = buffer.slice(6, 22); // 提取数据部分
+        const decoder = new TextDecoder('utf-8');
+        const data = decoder.decode(dataBuffer); // 解码字符串
+        const fields = data.split(';');
+        setFormValues({
+          itemNumber: fields[0],
+          itemName: fields[1],
+          warehouseNumber: fields[2],
+          shelfNumber: fields[3],
+          storageTime: fields[4],
+          isInStock: fields[5] === "true" ? true : false,
+        });
+      }
+    });
+    return unsubscribe;
+  }, [subscribe, toReceive]);
+
   const useOnReadCard = () => {
     setIsReadOnly(false);
-    setCardId(readCardId());
-    setFormValues({
-      itemNumber: "123456789",
-      itemName: "Test",
-      warehouseNumber: "1",
-      shelfNumber: "1",
-      storageTime: "2021-01-01",
-      isInStock: false,
-    });
+    send(RfidCommand.readCard().toString())
+    setToReceive(true);
   }
 
   return (
