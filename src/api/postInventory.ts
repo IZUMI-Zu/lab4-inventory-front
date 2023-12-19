@@ -1,7 +1,17 @@
 import { API_URL } from "./url.js";
-import convertToDateTime from "../utils/time";
+import convertToDateTime from "../utils/time.js";
 
-export default async function postInventory(formData, cardNumber, is_in_stock) {
+
+interface FormValues {
+    itemNumber: string;
+    itemName: string;
+    warehouseNumber: string;
+    shelfNumber: string;
+    storageTime: string;
+}
+
+
+export default async function postInventory(formData: FormValues, cardNumber: string, is_in_stock: boolean) {
 
     const formattedData = {
         item_number: formData.itemNumber,
