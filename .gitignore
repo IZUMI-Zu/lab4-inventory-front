@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+*.js
+*.js.map
+*.jsx
+*.jsx.map
