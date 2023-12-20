@@ -16,6 +16,7 @@
     "@nextui-org/system": "^2.0.15",
     "@nextui-org/theme": "^2.1.17",
     "@react-stately/data": "^3.11.0",
+    "@tauri-apps/api": "^1.5.2",
     "@types/w3c-web-serial": "^1.0.6",
     "apexcharts": "^3.35.5",
     "clsx": "^2.0.0",
