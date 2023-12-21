@@ -28,7 +28,8 @@ export interface SerialContextValue {
   connect(): Promise<boolean>;
   disconnect(): void;
   subscribe(callback: SerialMessageCallback): () => void;
-  send(data: string): Promise<void>;
+  send(data: Uint8Array): Promise<void>;
+  sendString(data: string): Promise<void>;
 }
 
 export const SerialContext = createContext<SerialContextValue>({
@@ -39,6 +40,7 @@ export const SerialContext = createContext<SerialContextValue>({
   portState: "closed",
   subscribe: () => () => { },
   send: () => Promise.resolve(),
+  sendString: () => Promise.resolve(),
 });
 
 export const useSerial = () => useContext(SerialContext);
@@ -92,7 +94,17 @@ const SerialProvider = ({
    * @returns a promise that resolves when the data has been sent
    * @throws if the port is not open
    */
-  const send = async (data: string) => {
+  const send = async (data: Uint8Array) => {
+    const port = portRef.current;
+    if (port && port.writable) {
+      const writer = port.writable.getWriter();
+      // const encoder = new TextEncoder();
+      await writer.write(data);
+      writer.releaseLock();
+    }
+  };
+
+  const sendString = async (data: string) => {
     const port = portRef.current;
     if (port && port.writable) {
       const writer = port.writable.getWriter();
@@ -100,7 +112,7 @@ const SerialProvider = ({
       await writer.write(encoder.encode(data));
       writer.releaseLock();
     }
-  };
+  }
 
   /**
    * Reads from the given port until it's been closed.
@@ -289,6 +301,7 @@ const SerialProvider = ({
         hasTriedAutoconnect,
         subscribe,
         send,
+        sendString,
         portState,
         connect: manualConnectToPort,
         disconnect: manualDisconnectFromPort,

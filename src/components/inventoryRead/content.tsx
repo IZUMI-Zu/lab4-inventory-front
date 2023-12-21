@@ -103,7 +103,7 @@ export const Content = () => {
 
   const useOnReadCard = () => {
     setIsReadOnly(false);
-    send(RfidCommand.readCard().toString())
+    send(RfidCommand.readCard())
     setToReceive(true);
   }
 

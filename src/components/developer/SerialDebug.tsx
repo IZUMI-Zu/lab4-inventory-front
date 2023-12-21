@@ -4,7 +4,7 @@ import { useSerial } from "../../utils/SerialProvider";
 
 
 export const SerialDebug = () => {
-    const { subscribe, send } = useSerial();
+    const { subscribe, sendString } = useSerial();
 
     const [dataToSend, setSerialData] = useState<string>("");
 
@@ -16,7 +16,9 @@ export const SerialDebug = () => {
     }
 
     const sendData = () => {
-        send(dataToSend);
+        // const data1 = new Uint8Array([0x7F, 0x02, 0x10, 0x12]);
+        // send(data1);
+        sendString(dataToSend);
     }
 
     useEffect(() => {
