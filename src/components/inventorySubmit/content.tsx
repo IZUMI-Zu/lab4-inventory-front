@@ -3,16 +3,8 @@ import { Input, Card, Button, Spinner } from "@nextui-org/react";
 import EyeFilledIcon from "./EyeFilledIcon";
 import EyeSlashFilledIcon from "./EyeSlashFilledIcon";
 import { useForm } from "react-hook-form";
-import postInventory from "../../api/postInventory";
+import postInventory, { FormValues } from "../../api/postInventory";
 import { RfidCommand } from "../../utils/rfid";
-
-interface FormValues {
-  itemNumber: string;
-  itemName: string;
-  warehouseNumber: string;
-  shelfNumber: string;
-  storageTime: string;
-}
 
 export const Content = () => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>();

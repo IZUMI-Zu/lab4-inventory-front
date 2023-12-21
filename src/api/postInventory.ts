@@ -1,15 +1,13 @@
-import { API_URL } from "./url.js";
-import convertToDateTime from "../utils/time.js";
+import { API_URL } from "./url";
+import convertToDateTime from "../utils/time";
 
-
-interface FormValues {
+export interface FormValues {
     itemNumber: string;
     itemName: string;
     warehouseNumber: string;
     shelfNumber: string;
     storageTime: string;
 }
-
 
 export default async function postInventory(formData: FormValues, cardNumber: string, is_in_stock: boolean) {
 
