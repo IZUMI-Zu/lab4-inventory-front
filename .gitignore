@@ -27,3 +27,5 @@ dist-ssr
 *.js.map
 *.jsx
 *.jsx.map
+
+/src-tauri
