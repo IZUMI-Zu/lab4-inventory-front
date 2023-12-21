@@ -1,4 +1,4 @@
-import {API_URL} from "./url.js";
+import {API_URL} from "./url";
 
 export interface InventoryType {
   id: number;
