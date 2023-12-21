@@ -14,7 +14,7 @@ export interface InventoryType {
 export default async function getInventory() {
   try {
     const response = await fetch(
-      API_URL.concat("?limit=1000&offset=0"),
+      API_URL.concat("?offset=0"),
       {
         method: "GET",
         headers: {
