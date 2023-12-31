@@ -1,8 +1,8 @@
 import React from 'react';
 import {ITable} from '../components/inventoryTable';
 
-const iTable = () => {
+const InventoryTable = () => {
    return <ITable />;
 };
 
-export default iTable;
+export default InventoryTable;

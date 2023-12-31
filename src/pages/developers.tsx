@@ -1,8 +1,8 @@
 import React from 'react';
 import {Content} from '../components/developer/content';
 
-const developer = () => {
+const Developer = () => {
    return <Content />;
 };
 
-export default developer;
+export default Developer;

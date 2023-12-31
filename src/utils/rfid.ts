@@ -13,15 +13,16 @@ export interface Sector {
     key: Key;
 }
 
-export interface Card {
-    type: number;
-    id: Uint8Array; // 4 bytes
-}
-
 export interface CommandResult {
     status: number;
-    card?: Card;
+    card: Uint8Array;
     data?: Uint8Array; // 16 bytes
+}
+
+interface RfidResponse {
+    length: Uint8Array; // 1 byte
+    command: Uint8Array; // 1 byte
+    data: Uint8Array; // n bytes
 }
 
 export class RfidCommand {
@@ -35,13 +36,57 @@ export class RfidCommand {
         return temp;
     }
 
+
+    static processDataArray(input: Uint8Array): Uint8Array {
+        const output: number[] = [];
+
+        for (let i = 0; i < input.length; i++) {
+            if (input[i] === 0x7F) {
+                output.push(0x7F);
+            }
+            output.push(input[i]);
+        }
+
+        return new Uint8Array(output);
+    }
+
+
+    static removeExtra(input: Uint8Array): Uint8Array {
+        const output: number[] = [];
+
+        for (let i = 0; i < input.length; i++) {
+            output.push(input[i]);
+            if (input[i] === 0x7F && input[i + 1] === 0x7F) {
+                i++; // skip the next 0x7F
+                continue;
+            }
+        }
+
+        return new Uint8Array(output);
+    }
+
+    static hexStringToUint8Array(hexString: string) {
+        if (hexString.length % 2 !== 0) {
+            console.error('Invalid hexString');
+            return new Uint8Array(0);
+        }
+        const arrayBuffer = new Uint8Array(hexString.length / 2);
+    
+        for (let i = 0; i < hexString.length; i += 2) {
+            arrayBuffer[i / 2] = Number('0x' + hexString.substr(i, 2));
+        }
+    
+        return arrayBuffer;
+    }
+
     static createCommand(cmd: number, data: Uint8Array): Uint8Array {
         const length = 2 + data.length; // 2 for command length and command itself
-        const command = new Uint8Array(length + 3); // 3 for command header, length and checksum
+        const command = new Uint8Array(length + 2); // 2 for command header and checksum
         command[0] = this.COMMAND_HEADER;
         command[1] = length;
         command[2] = cmd;
-        command.set(data, 3);
+        if (data.length > 0)
+            command.set(data, 3);
         command[command.length - 1] = this.checkSum(command, 1, length);
         return command;
     }
@@ -78,24 +123,35 @@ export class RfidCommand {
     }
 
     static readCard(): Uint8Array {
-        return this.createCommand(0x01, new Uint8Array(0));
+        return this.createCommand(0x10, new Uint8Array(0));
+    }
+
+    static preProcessResponse(response: Uint8Array): RfidResponse {
+        // TODO: deal with 7F
+        // remove the command header
+        const responseWithoutHeader = response.slice(1);
+    
+        // remove the checksum
+        const finalResponse = responseWithoutHeader.slice(0, responseWithoutHeader.length - 1);
+    
+        const rifdResponse : RfidResponse = {
+            length: finalResponse.slice(0, 1),
+            command: finalResponse.slice(1, 2),
+            data: finalResponse.slice(2),
+        }
+    
+        return rifdResponse;
     }
 
     // Parse the response from the RFID module
-    static parseResponse(response: Uint8Array): CommandResult {
+    static parseResponse(response: RfidResponse): CommandResult {
+        const data = response.data;
+    
         const result: CommandResult = {
-            status: response[0],
+            status: new DataView(data.slice(0, 1).buffer).getUint32(0),
+            card: data.slice(3, 8),
+            data: data.slice(8),
         };
-
-        if (result.status === 0x00) {
-            result.card = {
-                type: (response[1] << 8) | response[2],
-                id: response.slice(3, 7),
-            };
-            if (response.length > 7) {
-                result.data = response.slice(7);
-            }
-        }
 
         return result;
     }

@@ -1,30 +1,70 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Input, Card, Button, Spinner } from "@nextui-org/react";
 import EyeFilledIcon from "./EyeFilledIcon";
 import EyeSlashFilledIcon from "./EyeSlashFilledIcon";
 import { useForm } from "react-hook-form";
 import postInventory, { FormValues } from "../../api/postInventory";
-import { RfidCommand } from "../../utils/rfid";
+import { RfidCommand, Block, Key } from "../../utils/rfid";
+import { useSerial } from "../../utils/SerialProvider";
 
 export const Content = () => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>();
+  const { register, getValues, handleSubmit, reset, formState: { errors } } = useForm<FormValues>();
+  
+  const { subscribe, send } = useSerial();
 
   const [keyPassword, setKeyPassword] = useState<string>("");
 
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
   const [isSubmit, setIsSubmit] = useState<boolean>(false);
+  const [card, setCard] = useState<string>("");
 
   const toggleVisibility = () => setIsVisible(!isVisible);
+
+  useEffect(() => {
+    const unsubscribe = subscribe((message) => {
+      if(isSubmit) {
+        console.debug(message)
+
+        // Convert ArrayBuffer to hex array
+        const hexArray = new Uint8Array(message.value)
+        
+        const preRes = RfidCommand.preProcessResponse(hexArray);
+        
+        const res = RfidCommand.parseResponse(preRes);
+
+        // Convert hex array to upper case
+        const upperCaseHexArray = res.card.join(' ').toUpperCase();
+        console.log(upperCaseHexArray);
+        setCard(upperCaseHexArray);
+        setIsSubmit(false);
+      }
+    });
+    return unsubscribe;
+}, [isSubmit, subscribe]);
 
   const onSubmit = async (data: FormValues) => {
     try {
       setIsSubmit(true);
-      console.log(data);
-      console.log(keyPassword);
-      /// TODO
-      await postInventory(data, await RfidCommand.readCard().toString(), true);
-      setIsSubmit(false);
+
+      const passwordHex = RfidCommand.hexStringToUint8Array(keyPassword);
+      const cardNumber = getValues("itemNumber");
+      const encoder = new TextEncoder();
+      const uint8Array = encoder.encode(cardNumber);
+      const block: Block = {
+        address: 3,
+        data: new Uint8Array(uint8Array)
+      }
+
+      const key: Key = {
+        keyType: 'B',
+        value: passwordHex
+      }
+
+      send(RfidCommand.writeBlock(block, key));
+
+      await postInventory(data, card, true);
+
     } catch (error) {
       console.error(error);
       setIsSubmit(false);

@@ -72,7 +72,7 @@ export const Content = () => {
         const res = message.value;
         const buffer = new Uint8Array(res.length);
         for (let i = 0; i < res.length; i++) {
-          buffer[i] = res.charCodeAt(i);
+          // buffer[i] = res.charCodeAt(i);
         }
         const view = new DataView(buffer.buffer);
         
