@@ -43,7 +43,8 @@ export const SerialContext = createContext<SerialContextValue>({
   sendString: () => Promise.resolve(),
 });
 
-export const useSerial = () => useContext(SerialContext);
+// eslint-disable-next-line 
+export const useSerial = () => useContext(SerialContext); 
 
 interface SerialProviderProps { }
 const SerialProvider = ({
@@ -279,7 +280,6 @@ const SerialProvider = ({
         navigator.serial.removeEventListener("disconnect", onPortDisconnect);
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portState]);
 
   // Tries to auto-connect to a port, if possible
