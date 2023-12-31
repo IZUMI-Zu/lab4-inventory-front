@@ -124,7 +124,7 @@ const SerialProvider = ({
       let buffer = new Uint8Array();
       let timer = null;
       readerRef.current = port.readable.getReader();
-  
+
       const processData = () => {
         // Handle the buffer
         const timestamp = Date.now();
@@ -135,7 +135,7 @@ const SerialProvider = ({
         buffer = new Uint8Array();
         timer = null;
       };
-  
+
       try {
         while (readerRef.current) {
           const { value, done } = await readerRef.current.read();
