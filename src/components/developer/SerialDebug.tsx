@@ -4,7 +4,7 @@ import { useSerial } from "../../utils/SerialProvider";
 
 
 export const SerialDebug = () => {
-    const { subscribe, sendString } = useSerial();
+    const { subscribe, send } = useSerial();
 
     const [dataToSend, setSerialData] = useState<string>("");
 
@@ -16,19 +16,27 @@ export const SerialDebug = () => {
     }
 
     const sendData = () => {
-        // const data1 = new Uint8Array([0x7F, 0x02, 0x10, 0x12]);
-        // send(data1);
-        sendString(dataToSend);
+        function stringToUint8Array(str: string): Uint8Array {
+            const arr = str.split(' ').map(s => parseInt(s, 16));
+            return new Uint8Array(arr);
+        }
+        send(stringToUint8Array(dataToSend));
     }
 
     useEffect(() => {
         const unsubscribe = subscribe((message) => {
             console.debug(message)
             const time = new Date(message.timestamp).toLocaleString();
-            setReceivedData("Time: " + time + "\n" + "Message: " + message.value);
+    
+            // Convert ArrayBuffer to hex array
+            const hexArray = Array.from(new Uint8Array(message.value), byte => ('0' + byte.toString(16)).slice(-2));
+    
+            // Convert hex array to upper case
+            const upperCaseHexArray = hexArray.join(' ').toUpperCase();
+    
+            setReceivedData("Time: " + time + "\n" + "Message: " + upperCaseHexArray);
         });
         return unsubscribe;
-
     }, [subscribe]);
 
     return (

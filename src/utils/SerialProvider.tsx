@@ -15,7 +15,7 @@ import {
 export type PortState = "closed" | "closing" | "open" | "opening";
 
 export type SerialMessage = {
-  value: string;
+  value: Uint8Array;
   timestamp: number;
 };
 
@@ -120,13 +120,22 @@ const SerialProvider = ({
    * @param port the port to read from
    */
   const readUntilClosed = async (port: SerialPort) => {
-    // TODO right now this only works for data with "\n" as the delimiter
     if (port.readable) {
-      let buffer = "";
-      const textDecoder = new TextDecoderStream();
-      const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
-      readerRef.current = textDecoder.readable.getReader();
-
+      let buffer = new Uint8Array();
+      let timer = null;
+      readerRef.current = port.readable.getReader();
+  
+      const processData = () => {
+        // Handle the buffer
+        const timestamp = Date.now();
+        Array.from(subscribersRef.current).forEach(([, callback]) => {
+          callback({ value: buffer, timestamp }); // return Uint8Array
+        });
+        // Clear buffer after processing
+        buffer = new Uint8Array();
+        timer = null;
+      };
+  
       try {
         while (readerRef.current) {
           const { value, done } = await readerRef.current.read();
@@ -134,33 +143,25 @@ const SerialProvider = ({
             break;
           }
           // Append new data to buffer
-          buffer += value;
-
-          // Check if buffer contains a complete message
-          let newlineIndex = buffer.indexOf("\n");
-          while (newlineIndex !== -1) {
-            // Extract the complete message
-            const message = buffer.slice(0, newlineIndex);
-            // Remove the message from the buffer
-            buffer = buffer.slice(newlineIndex + 1);
-
-            // Handle the message
-            const timestamp = Date.now();
-            Array.from(subscribersRef.current).forEach(([, callback]) => {
-              callback({ value: message, timestamp });
-            });
-
-            // Check if there is another complete message in the buffer
-            newlineIndex = buffer.indexOf("\n");
+          const newValue = new Uint8Array(buffer.length + value.length);
+          newValue.set(buffer);
+          newValue.set(value, buffer.length);
+          buffer = newValue;
+          // Start a timer if not already started
+          if (timer === null) {
+            timer = setTimeout(processData, 200);
           }
         }
       } catch (error) {
         console.error(error);
       } finally {
         readerRef.current.releaseLock();
+        // If there's a pending timer when the stream ends, process the data
+        if (timer !== null) {
+          clearTimeout(timer);
+          processData();
+        }
       }
-
-      await readableStreamClosed.catch(() => { }); // Ignore the error
     }
   };
 
