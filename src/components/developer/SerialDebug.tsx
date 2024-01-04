@@ -1,5 +1,5 @@
 import { Button, Input, Textarea } from "@nextui-org/react";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { useSerial } from "../../utils/SerialProvider";
 
 
@@ -53,7 +53,7 @@ export const SerialDebug = () => {
                 <Input
                     label="Sent Data"
                     value={dataToSend}
-                    onChange={(e) => setSerialData(e.target.value)}
+                    onChange={(e: { target: { value: SetStateAction<string>; }; }) => setSerialData(e.target.value)}
                     className="col-start-1 col-end-3 max-w-x p-6 pt-2 ml-1"
                 >
                 </Input>
